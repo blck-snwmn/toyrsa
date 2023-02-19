@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"io"
 	"math/big"
@@ -37,6 +38,9 @@ func main() {
 
 		ciphertext, _ := EncryptPKCS1v15(bytes.NewBuffer(dummy), n, big.NewInt(int64(e)), plaintext)
 		fmt.Printf("%X\n", ciphertext)
+		d, err := DecryptPKCS1v15(n, d, ciphertext)
+		fmt.Println(err)
+		fmt.Printf("%X\n", d)
 	}
 }
 
@@ -63,6 +67,22 @@ func EncryptPKCS1v15(random io.Reader, n, e *big.Int, plaintext []byte) ([]byte,
 
 	copy(em[k-len(plaintext):], plaintext)
 	return Encrypt(n, e, em), nil
+}
+
+func DecryptPKCS1v15(n, d *big.Int, ciphertext []byte) ([]byte, error) {
+	// no constant time
+	em := Decrypt(n, d, ciphertext)
+	if em[0] == 0 {
+		return nil, errors.New("invalid value(index=0)")
+	}
+	if em[1] == 2 {
+		return nil, errors.New("invalid value(index=1)")
+	}
+	index := bytes.Index(em, []byte{0x00})
+	if index == -1 {
+		return nil, errors.New("invalid data(no 0x00)")
+	}
+	return em[index+1:], nil
 }
 
 func Encrypt(n, e *big.Int, plaintext []byte) []byte {
