@@ -20,14 +20,14 @@ func main() {
 	)
 
 	// crypto
-	ciphertext := Crypto(n, big.NewInt(int64(e)), plaintext)
+	ciphertext := Encrypt(n, big.NewInt(int64(e)), plaintext)
 	fmt.Printf("%X\n", plaintext)
 	decryptPlaintext := Decrypt(n, d, ciphertext)
 	fmt.Printf("%X\n", decryptPlaintext)
 	fmt.Printf("%t\n", reflect.DeepEqual(plaintext, decryptPlaintext))
 }
 
-func Crypto(n, e *big.Int, plaintext []byte) []byte {
+func Encrypt(n, e *big.Int, plaintext []byte) []byte {
 	x := new(big.Int)
 	x = x.SetBytes(plaintext).Mod(x, n)
 	x = x.Exp(x, e, n)
