@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/subtle"
+	"io"
 	"math/big"
 	"reflect"
 	"testing"
@@ -81,10 +82,15 @@ func Test_EncryptOAEP(t *testing.T) {
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
 	label := []byte("test")
-	dummy := bytes.Repeat([]byte{0xFF}, 128)
-	gociphertext, _ := rsa.EncryptOAEP(sha256.New(), bytes.NewBuffer(dummy), &key.PublicKey, plaintext, label)
-	ciphertext, _ := EncryptOAEP(sha256.New(), bytes.NewBuffer(dummy), n, big.NewInt(int64(e)), plaintext, label)
-	if !reflect.DeepEqual(ciphertext, gociphertext) {
-		t.Errorf("\ngot =%X,\nwant=%X\n", ciphertext, gociphertext)
+
+	reader := rand.Reader
+	b := bytes.NewBuffer(nil)
+	reader = io.TeeReader(reader, b)
+	for i := 0; i < 1000; i++ {
+		gociphertext, _ := rsa.EncryptOAEP(sha256.New(), reader, &key.PublicKey, plaintext, label)
+		ciphertext, _ := EncryptOAEP(sha256.New(), b, n, big.NewInt(int64(e)), plaintext, label)
+		if !reflect.DeepEqual(ciphertext, gociphertext) {
+			t.Errorf("\ngot =%X,\nwant=%X", ciphertext, gociphertext)
+		}
 	}
 }

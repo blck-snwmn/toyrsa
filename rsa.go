@@ -93,10 +93,13 @@ func EncryptOAEP(hash hash.Hash, random io.Reader, n, e *big.Int, plaintext, lab
 }
 
 func Encrypt(n, e *big.Int, plaintext []byte) []byte {
+	o := make([]byte, len(plaintext))
 	x := new(big.Int)
 	x = x.SetBytes(plaintext).Mod(x, n)
 	x = x.Exp(x, e, n)
-	return x.Bytes()
+	r := x.Bytes()
+	copy(o[len(o)-len(r):], r)
+	return o
 }
 
 func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
