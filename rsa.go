@@ -78,18 +78,14 @@ func EncryptOAEP(hash hash.Hash, random io.Reader, n, e *big.Int, plaintext, lab
 	if err != nil {
 		return nil, err
 	}
-	maskedDB := make([]byte, len(db))
-	subtle.XORBytes(maskedDB, db, maskDB)
+	subtle.XORBytes(db, db, maskDB)
 
-	maskSeed, err := mgf1(maskedDB, hash, len(seed))
+	maskSeed, err := mgf1(db, hash, len(seed))
 	if err != nil {
 		return nil, err
 	}
-	maskedSeed := make([]byte, len(db))
-	subtle.XORBytes(maskedSeed, seed, maskSeed)
+	subtle.XORBytes(seed, seed, maskSeed)
 
-	copy(seed, maskedSeed)
-	copy(db, maskedDB)
 	return Encrypt(n, e, em), nil
 }
 
