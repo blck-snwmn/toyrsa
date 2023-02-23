@@ -134,19 +134,5 @@ func mgf1(seed []byte, hash hash.Hash, maskLen int) ([]byte, error) {
 
 		counter++
 	}
-
-	// for i := 0; i < max; i++ {
-	// 	binary.BigEndian.PutUint32(counterBuf, counter)
-	// 	hash.Reset()
-	// 	hash.Write(seed)
-	// 	hash.Write(counterBuf)
-	// 	g := hash.Sum(nil)
-	// 	copy(head, g)
-	// 	if len(head) >= hLen {
-	// 		head = head[hLen:]
-	// 	}
-
-	// 	counter++
-	// }
 	return t, nil
 }
