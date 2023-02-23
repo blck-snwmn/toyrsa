@@ -74,17 +74,15 @@ func EncryptOAEP(hash hash.Hash, random io.Reader, n, e *big.Int, plaintext, lab
 	if err != nil {
 		return nil, err
 	}
-	maskDB, err := mgf1(seed, hash, len(db))
+	err = mgf1xor(db, seed, hash)
 	if err != nil {
 		return nil, err
 	}
-	subtle.XORBytes(db, db, maskDB)
 
-	maskSeed, err := mgf1(db, hash, len(seed))
+	err = mgf1xor(seed, db, hash)
 	if err != nil {
 		return nil, err
 	}
-	subtle.XORBytes(seed, seed, maskSeed)
 
 	return Encrypt(n, e, em), nil
 }
@@ -109,7 +107,8 @@ func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
 	return o
 }
 
-func mgf1(seed []byte, hash hash.Hash, maskLen int) ([]byte, error) {
+func mgf1xor(out, seed []byte, hash hash.Hash) error {
+	maskLen := len(out)
 	hLen := hash.Size()
 	counter := uint32(0)
 
@@ -130,9 +129,11 @@ func mgf1(seed []byte, hash hash.Hash, maskLen int) ([]byte, error) {
 		if len(head) < consumeLen {
 			consumeLen = len(head)
 		}
-		head = head[consumeLen:]
+		subtle.XORBytes(out, out, head[:consumeLen])
 
+		out = out[consumeLen:]
+		head = head[consumeLen:]
 		counter++
 	}
-	return t, nil
+	return nil
 }
