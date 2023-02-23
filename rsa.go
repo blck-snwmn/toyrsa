@@ -109,9 +109,10 @@ func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
 
 func mgf1xor(out, seed []byte, hash hash.Hash) error {
 	maskLen := len(out)
-	hLen := hash.Size()
-	counter := uint32(0)
 
+	hLen := hash.Size()
+
+	counter := uint32(0)
 	counterBuf := make([]byte, 4)
 
 	t := make([]byte, maskLen)
