@@ -38,12 +38,13 @@ func EncryptPKCS1v15(random io.Reader, n, e *big.Int, plaintext []byte) ([]byte,
 func DecryptPKCS1v15(n, d *big.Int, ciphertext []byte) ([]byte, error) {
 	// no constant time
 	em := Decrypt(n, d, ciphertext)
-	if em[0] == 0 {
+	if em[0] != 0 {
 		return nil, errors.New("invalid value(index=0)")
 	}
-	if em[1] == 2 {
+	if em[1] != 2 {
 		return nil, errors.New("invalid value(index=1)")
 	}
+	em = em[2:]
 	index := bytes.Index(em, []byte{0x00})
 	if index == -1 {
 		return nil, errors.New("invalid data(no 0x00)")
@@ -103,10 +104,13 @@ func Encrypt(n, e *big.Int, plaintext []byte) []byte {
 }
 
 func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
+	o := make([]byte, len(ciphertext))
 	x := new(big.Int)
 	x = x.SetBytes(ciphertext).Mod(x, n)
 	x = x.Exp(x, d, n)
-	return x.Bytes()
+	r := x.Bytes()
+	copy(o[len(o)-len(r):], r)
+	return o
 }
 
 func mgf1(seed []byte, hash hash.Hash, maskLen int) ([]byte, error) {
