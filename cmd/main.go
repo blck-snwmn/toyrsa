@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"fmt"
 	"math/big"
 	"reflect"
@@ -41,5 +42,14 @@ func main() {
 		d, err := toyrsa.DecryptPKCS1v15(n, d, ciphertext)
 		fmt.Println(err)
 		fmt.Printf("%X\n", d)
+	}
+	{
+		label := []byte("test")
+		dummy := bytes.Repeat([]byte{0xFF}, 128)
+		gociphertext, _ := rsa.EncryptOAEP(sha256.New(), bytes.NewBuffer(dummy), &key.PublicKey, plaintext, label)
+		fmt.Printf("%X\n", gociphertext)
+
+		ciphertext, _ := toyrsa.EncryptOAEP(sha256.New(), bytes.NewBuffer(dummy), n, big.NewInt(int64(e)), plaintext, label)
+		fmt.Printf("%X\n", ciphertext)
 	}
 }
