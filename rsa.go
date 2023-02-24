@@ -74,15 +74,8 @@ func EncryptOAEP(hash hash.Hash, random io.Reader, n, e *big.Int, plaintext, lab
 	if err != nil {
 		return nil, err
 	}
-	err = mgf1xor(db, seed, hash)
-	if err != nil {
-		return nil, err
-	}
-
-	err = mgf1xor(seed, db, hash)
-	if err != nil {
-		return nil, err
-	}
+	mgf1xor(db, seed, hash)
+	mgf1xor(seed, db, hash)
 
 	return Encrypt(n, e, em), nil
 }
@@ -101,14 +94,9 @@ func DecryptOAEP(hash hash.Hash, random io.Reader, n, d *big.Int, ciphertext, la
 	seed := em[1 : hash.Size()+1]
 	db := em[hash.Size()+1:]
 
-	err := mgf1xor(seed, db, hash)
-	if err != nil {
-		return nil, err
-	}
-	err = mgf1xor(db, seed, hash)
-	if err != nil {
-		return nil, err
-	}
+	mgf1xor(seed, db, hash)
+	mgf1xor(db, seed, hash)
+
 	if subtle.ConstantTimeCompare(db[:hash.Size()], lHash) == 0 {
 		return nil, errors.New("invalid data")
 	}
@@ -137,7 +125,7 @@ func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
 	return o
 }
 
-func mgf1xor(out, seed []byte, hash hash.Hash) error {
+func mgf1xor(out, seed []byte, hash hash.Hash) {
 	maskLen := len(out)
 
 	hLen := hash.Size()
@@ -166,5 +154,5 @@ func mgf1xor(out, seed []byte, hash hash.Hash) error {
 		head = head[consumeLen:]
 		counter++
 	}
-	return nil
+	return
 }
