@@ -87,6 +87,36 @@ func EncryptOAEP(hash hash.Hash, random io.Reader, n, e *big.Int, plaintext, lab
 	return Encrypt(n, e, em), nil
 }
 
+func DecryptOAEP(hash hash.Hash, random io.Reader, n, d *big.Int, ciphertext, label []byte) ([]byte, error) {
+	em := Decrypt(n, d, ciphertext)
+
+	hash.Reset()
+	hash.Write(label)
+	lHash := hash.Sum(nil)
+	hash.Reset()
+
+	if em[0] != 0x00 {
+		return nil, errors.New("invalid data")
+	}
+	seed := em[1 : hash.Size()+1]
+	db := em[hash.Size()+1:]
+
+	err := mgf1xor(seed, db, hash)
+	if err != nil {
+		return nil, err
+	}
+	err = mgf1xor(db, seed, hash)
+	if err != nil {
+		return nil, err
+	}
+	if subtle.ConstantTimeCompare(db[:hash.Size()], lHash) == 0 {
+		return nil, errors.New("invalid data")
+	}
+	db = db[hash.Size():]
+	index := bytes.Index(db, []byte{0x01})
+	return db[index+1:], nil
+}
+
 func Encrypt(n, e *big.Int, plaintext []byte) []byte {
 	o := make([]byte, len(plaintext))
 	x := new(big.Int)

@@ -86,7 +86,7 @@ func Test_EncryptOAEP(t *testing.T) {
 	key, _ := rsa.GenerateKey(rand.Reader, 1024)
 
 	var (
-		// d = key.D
+		d = key.D
 		n = key.N
 		e = key.E
 
@@ -102,6 +102,13 @@ func Test_EncryptOAEP(t *testing.T) {
 		ciphertext, _ := EncryptOAEP(sha256.New(), b, n, big.NewInt(int64(e)), plaintext, label)
 		if !reflect.DeepEqual(ciphertext, gociphertext) {
 			t.Errorf("\ngot =%X,\nwant=%X", ciphertext, gociphertext)
+		}
+		decryptPlaintext, err := DecryptOAEP(sha256.New(), nil, n, d, ciphertext, label)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(plaintext, decryptPlaintext) {
+			t.Errorf("\ngot =%X,\nwant=%X\n", plaintext, decryptPlaintext)
 		}
 	}
 }
