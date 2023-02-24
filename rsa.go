@@ -146,5 +146,4 @@ func mgf1xor(out, seed []byte, hash hash.Hash) {
 		out = out[consumeLen:]
 		counter++
 	}
-	return
 }
