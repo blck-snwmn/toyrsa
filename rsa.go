@@ -126,32 +126,27 @@ func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
 }
 
 func mgf1xor(out, seed []byte, hash hash.Hash) {
-	maskLen := len(out)
 
 	hLen := hash.Size()
 
 	counter := uint32(0)
 	counterBuf := make([]byte, 4)
 
-	t := make([]byte, maskLen)
-	head := t
+	var buf []byte
 
-	for len(head) > 0 {
+	for len(out) > 0 {
 		binary.BigEndian.PutUint32(counterBuf, counter)
 		hash.Reset()
 		hash.Write(seed)
 		hash.Write(counterBuf)
-		g := hash.Sum(nil)
-		copy(head, g)
+		h := hash.Sum(buf[:0])
+		subtle.XORBytes(out, out, h)
 
 		consumeLen := hLen
-		if len(head) < consumeLen {
-			consumeLen = len(head)
+		if len(out) < consumeLen {
+			consumeLen = len(out)
 		}
-		subtle.XORBytes(out, out, head[:consumeLen])
-
 		out = out[consumeLen:]
-		head = head[consumeLen:]
 		counter++
 	}
 	return
