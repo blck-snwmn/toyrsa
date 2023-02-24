@@ -38,15 +38,12 @@ func EncryptPKCS1v15(random io.Reader, n, e *big.Int, plaintext []byte) ([]byte,
 func DecryptPKCS1v15(n, d *big.Int, ciphertext []byte) ([]byte, error) {
 	// no constant time
 	em := Decrypt(n, d, ciphertext)
-	if em[0] != 0 {
-		return nil, errors.New("invalid value(index=0)")
-	}
-	if em[1] != 2 {
-		return nil, errors.New("invalid value(index=1)")
-	}
+	valid0 := em[0] == 0
+	valid1 := em[1] == 2
 	em = em[2:]
 	index := bytes.Index(em, []byte{0x00})
-	if index == -1 {
+	valid := index != -1 && valid0 && valid1
+	if !valid {
 		return nil, errors.New("invalid data(no 0x00)")
 	}
 	return em[index+1:], nil
