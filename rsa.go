@@ -88,20 +88,20 @@ func DecryptOAEP(hash hash.Hash, random io.Reader, n, d *big.Int, ciphertext, la
 	lHash := hash.Sum(nil)
 	hash.Reset()
 
-	if em[0] != 0x00 {
-		return nil, errors.New("invalid data")
-	}
 	seed := em[1 : hash.Size()+1]
 	db := em[hash.Size()+1:]
 
 	mgf1xor(seed, db, hash)
 	mgf1xor(db, seed, hash)
 
-	if subtle.ConstantTimeCompare(db[:hash.Size()], lHash) == 0 {
-		return nil, errors.New("invalid data")
-	}
+	isSameHash := subtle.ConstantTimeCompare(db[:hash.Size()], lHash) == 1
+
 	db = db[hash.Size():]
 	index := bytes.Index(db, []byte{0x01})
+	valid := index != -1 && isSameHash && em[0] == 0x00
+	if !valid {
+		return nil, errors.New("invalid data")
+	}
 	return db[index+1:], nil
 }
 
