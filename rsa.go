@@ -36,15 +36,15 @@ func EncryptPKCS1v15(random io.Reader, n, e *big.Int, plaintext []byte) ([]byte,
 }
 
 func DecryptPKCS1v15(n, d *big.Int, ciphertext []byte) ([]byte, error) {
-	// no constant time
 	em := Decrypt(n, d, ciphertext)
-	valid0 := em[0] == 0
-	valid1 := em[1] == 2
+
+	valid0 := subtle.ConstantTimeByteEq(em[0], 0) == 1
+	valid1 := subtle.ConstantTimeByteEq(em[1], 2) == 1
 	em = em[2:]
-	index := bytes.Index(em, []byte{0x00})
+	index := bytes.Index(em, []byte{0x00}) // no constant time
 	valid := index != -1 && valid0 && valid1
 	if !valid {
-		return nil, errors.New("invalid data(no 0x00)")
+		return nil, errors.New("invalid data")
 	}
 	return em[index+1:], nil
 }
@@ -94,8 +94,8 @@ func DecryptOAEP(hash hash.Hash, random io.Reader, n, d *big.Int, ciphertext, la
 	isSameHash := subtle.ConstantTimeCompare(db[:hash.Size()], lHash) == 1
 
 	db = db[hash.Size():]
-	index := bytes.Index(db, []byte{0x01})
-	valid := index != -1 && isSameHash && em[0] == 0x00
+	index := bytes.Index(db, []byte{0x01}) // no constant time
+	valid := index != -1 && isSameHash && subtle.ConstantTimeByteEq(em[0], 0x00) == 1
 	if !valid {
 		return nil, errors.New("invalid data")
 	}
