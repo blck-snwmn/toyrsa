@@ -103,6 +103,14 @@ func DecryptOAEP(hash hash.Hash, random io.Reader, n, d *big.Int, ciphertext, la
 }
 
 func Encrypt(n, e *big.Int, plaintext []byte) []byte {
+	return encrypt(n, e, plaintext)
+}
+
+func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
+	return decrypt(n, d, ciphertext)
+}
+
+func encrypt(n, e *big.Int, plaintext []byte) []byte {
 	o := make([]byte, len(plaintext))
 	x := new(big.Int)
 	x = x.SetBytes(plaintext).Mod(x, n)
@@ -112,7 +120,7 @@ func Encrypt(n, e *big.Int, plaintext []byte) []byte {
 	return o
 }
 
-func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
+func decrypt(n, d *big.Int, ciphertext []byte) []byte {
 	o := make([]byte, len(ciphertext))
 	x := new(big.Int)
 	x = x.SetBytes(ciphertext).Mod(x, n)
