@@ -106,7 +106,15 @@ func Encrypt(n, e *big.Int, plaintext []byte) []byte {
 	return encrypt(n, e, plaintext)
 }
 
+func Verify(n, e *big.Int, plaintext []byte) []byte {
+	return encrypt(n, e, plaintext)
+}
+
 func Decrypt(n, d *big.Int, ciphertext []byte) []byte {
+	return decrypt(n, d, ciphertext)
+}
+
+func Sign(n, d *big.Int, ciphertext []byte) []byte {
 	return decrypt(n, d, ciphertext)
 }
 
