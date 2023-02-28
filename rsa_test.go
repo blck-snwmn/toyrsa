@@ -34,8 +34,8 @@ func Test_Encrypt(t *testing.T) {
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
-	ciphertext := Encrypt(n, big.NewInt(int64(e)), plaintext)
-	decryptPlaintext := Decrypt(n, d, ciphertext)
+	ciphertext := encrypt(n, big.NewInt(int64(e)), plaintext)
+	decryptPlaintext := decrypt(n, d, ciphertext)
 	if !reflect.DeepEqual(plaintext, decryptPlaintext) {
 		t.Errorf("\ngot =%X,\nwant=%X\n", plaintext, decryptPlaintext)
 	}
@@ -55,7 +55,7 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 	genReader := func(gociphertext []byte) io.Reader {
 		// Use Go results.
 		// Because rsa.EncryptPKCS1v15 calls randutil.MaybeReadByte, so the sequence of bytes read can change from run to run.
-		x := Decrypt(n, d, gociphertext)
+		x := decrypt(n, d, gociphertext)
 		x = x[2:]
 		index := bytes.Index(x, []byte{0x00})
 		return bytes.NewBuffer(x[0:index])
