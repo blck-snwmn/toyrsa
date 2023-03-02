@@ -118,6 +118,19 @@ func Sign(n, d *big.Int, ciphertext []byte) []byte {
 	return decrypt(n, d, ciphertext)
 }
 
+func SignPSS(hash hash.Hash, random io.Reader, n, d *big.Int, digest []byte, saltLen int) ([]byte, error) {
+	salt := make([]byte, saltLen)
+	_, err := random.Read(salt)
+	if err != nil {
+		return nil, err
+	}
+	em, err := encodeEMSAPSS(hash, digest, salt, n.BitLen()-1)
+	if err != nil {
+		return nil, err
+	}
+	return Sign(n, d, em), nil
+}
+
 func encrypt(n, e *big.Int, plaintext []byte) []byte {
 	o := make([]byte, len(plaintext))
 	x := new(big.Int)
@@ -162,4 +175,40 @@ func mgf1xor(out, seed []byte, hash hash.Hash) {
 		out = out[consumeLen:]
 		counter++
 	}
+}
+
+func encodeEMSAPSS(hash hash.Hash, m, salt []byte, emBits int) ([]byte, error) {
+	emLen := (emBits + 7) / 8
+	sLen := len(salt)
+	if emLen < hash.Size()+sLen+2 {
+		return nil, errors.New("encoding error")
+	}
+
+	// hash.Reset()
+	// hash.Write(m)
+	// mHash := hash.Sum(nil)
+	mHash := m
+	hash.Reset()
+
+	mm := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	mm = append(mm, mHash...)
+	mm = append(mm, salt...)
+
+	hash.Write(mm)
+	h := hash.Sum(nil)
+	hash.Reset()
+
+	ps := make([]byte, emLen-sLen-hash.Size()-2)
+
+	db := append(ps, 0x01)
+	db = append(db, salt...)
+
+	mgf1xor(db, h, hash)
+
+	db[0] &= byte(0xFF >> (8*emLen - emBits))
+
+	em := append(db, h...)
+	em = append(em, 0xbc)
+
+	return em, nil
 }
