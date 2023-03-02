@@ -13,6 +13,7 @@ import (
 )
 
 func Test_mgf1(t *testing.T) {
+	t.Parallel()
 	seed := []byte("\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff")
 	db := []byte("\x9f\x86Ё\x88L}e\x9a/\xea\xa0\xc5Z\xd0\x15\xa3\xbfO\x1b+\v\x82,\xd1]l\x15\xb0\xf0\n\b\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01Cozy lummox gives smart squid who asks for job pen.")
 
@@ -43,6 +44,7 @@ func Test_Encrypt(t *testing.T) {
 }
 
 func Test_EncryptPKCS1v15(t *testing.T) {
+	t.Parallel()
 	key, _ := rsa.GenerateKey(rand.Reader, 1024)
 
 	var (
@@ -84,6 +86,7 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 }
 
 func Test_EncryptOAEP(t *testing.T) {
+	t.Parallel()
 	key, _ := rsa.GenerateKey(rand.Reader, 1024)
 
 	var (
@@ -115,6 +118,7 @@ func Test_EncryptOAEP(t *testing.T) {
 }
 
 func TestSignPSS(t *testing.T) {
+	t.Parallel()
 	key, _ := rsa.GenerateKey(rand.Reader, 1024)
 
 	var (
