@@ -178,6 +178,8 @@ func mgf1xor(out, seed []byte, hash hash.Hash) {
 }
 
 func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, error) {
+	// See RFC 8017, Section 9.1.1.
+
 	emLen := (emBits + 7) / 8
 	sLen := len(salt)
 	if emLen < hash.Size()+sLen+2 {
@@ -186,6 +188,10 @@ func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, erro
 
 	hash.Reset()
 
+	// 5.   Let
+	//    M' = (0x)00 00 00 00 00 00 00 00 || mHash || salt;
+	//    M' is an octet string of length 8 + hLen + sLen with eight initial zero octets.
+	// 6.   Let H = Hash(M'), an octet string of length hLen.
 	hash.Write([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 	hash.Write(mHash)
 	hash.Write(salt)
@@ -197,14 +203,20 @@ func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, erro
 	db := em[:emLen-hash.Size()-1]
 	db[len(db)-sLen-1] = 0x01
 	copy(db[len(db)-sLen:], salt)
+
+	// 9.   Let dbMask = MGF(H, emLen - hLen - 1).
+	// 10.  Let maskedDB = DB \xor dbMask.
 	mgf1xor(db, h, hash)
+	// 11.  Set the leftmost 8emLen - emBits bits of the leftmost octet in maskedDB to zero.
 	db[0] &= byte(0xFF >> (8*emLen - emBits))
 
+	// 12.  Let EM = maskedDB || H || 0xbc.
 	head := em[len(db):]
 	copy(head, h)
 	head = head[len(h):]
 	head[0] = 0xbc
 
+	// 13.  Output EM.
 	return em, nil
 }
 
