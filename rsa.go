@@ -192,18 +192,15 @@ func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, erro
 	h := hash.Sum(nil)
 	hash.Reset()
 
-	db := make([]byte, emLen-hash.Size()-1)
+	em := make([]byte, emLen)
+
+	db := em[:emLen-hash.Size()-1]
 	db[len(db)-sLen-1] = 0x01
 	copy(db[len(db)-sLen:], salt)
-
 	mgf1xor(db, h, hash)
-
 	db[0] &= byte(0xFF >> (8*emLen - emBits))
 
-	em := make([]byte, len(db)+len(h)+1)
-	head := em
-	copy(head, db)
-	head = head[len(db):]
+	head := em[len(db):]
 	copy(head, h)
 	head = head[len(h):]
 	head[0] = 0xbc
