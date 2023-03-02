@@ -201,8 +201,13 @@ func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, erro
 
 	db[0] &= byte(0xFF >> (8*emLen - emBits))
 
-	em := append(db, h...)
-	em = append(em, 0xbc)
+	em := make([]byte, len(db)+len(h)+1)
+	head := em
+	copy(head, db)
+	head = head[len(db):]
+	copy(head, h)
+	head = head[len(h):]
+	head[0] = 0xbc
 
 	return em, nil
 }
