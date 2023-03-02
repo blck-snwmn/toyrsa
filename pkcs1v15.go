@@ -34,3 +34,15 @@ func DecryptPKCS1v15(n, d *big.Int, ciphertext []byte) ([]byte, error) {
 	}
 	return em[index+1:], nil
 }
+
+func fillNonZeroBytes(random io.Reader, buf []byte) error {
+	for i := range buf {
+		for buf[i] == 0 {
+			_, err := random.Read(buf[i : i+1])
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

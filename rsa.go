@@ -4,21 +4,8 @@ import (
 	"crypto/subtle"
 	"encoding/binary"
 	"hash"
-	"io"
 	"math/big"
 )
-
-func fillNonZeroBytes(random io.Reader, buf []byte) error {
-	for i := range buf {
-		for buf[i] == 0 {
-			_, err := random.Read(buf[i : i+1])
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
 
 func Encrypt(n, e *big.Int, plaintext []byte) []byte {
 	return encrypt(n, e, plaintext)
