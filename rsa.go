@@ -188,8 +188,8 @@ func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, erro
 
 	hash.Reset()
 
-	// 5.   Let
-	//    M' = (0x)00 00 00 00 00 00 00 00 || mHash || salt;
+	// 5. Let
+	//      M' = (0x)00 00 00 00 00 00 00 00 || mHash || salt;
 	//    M' is an octet string of length 8 + hLen + sLen with eight initial zero octets.
 	// 6.   Let H = Hash(M'), an octet string of length hLen.
 	hash.Write([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
