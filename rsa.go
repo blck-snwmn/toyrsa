@@ -186,11 +186,9 @@ func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, erro
 
 	hash.Reset()
 
-	mm := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	mm = append(mm, mHash...)
-	mm = append(mm, salt...)
-
-	hash.Write(mm)
+	hash.Write([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+	hash.Write(mHash)
+	hash.Write(salt)
 	h := hash.Sum(nil)
 	hash.Reset()
 
