@@ -124,7 +124,7 @@ func TestSignPSS(t *testing.T) {
 	var (
 		d = key.D
 		n = key.N
-		// e = key.E
+		e = big.NewInt(int64(key.E))
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
@@ -148,6 +148,10 @@ func TestSignPSS(t *testing.T) {
 			t.Errorf("\ngot =%X,\nwant=%X\n", s, gs)
 		}
 		err = rsa.VerifyPSS(&key.PublicKey, crypto.SHA256, digest, s, &rsa.PSSOptions{SaltLength: 10})
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = VerifyPSS(sha256.New(), n, e, digest, s, 10)
 		if err != nil {
 			t.Fatal(err)
 		}
