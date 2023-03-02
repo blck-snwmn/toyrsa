@@ -177,17 +177,13 @@ func mgf1xor(out, seed []byte, hash hash.Hash) {
 	}
 }
 
-func encodeEMSAPSS(hash hash.Hash, m, salt []byte, emBits int) ([]byte, error) {
+func encodeEMSAPSS(hash hash.Hash, mHash, salt []byte, emBits int) ([]byte, error) {
 	emLen := (emBits + 7) / 8
 	sLen := len(salt)
 	if emLen < hash.Size()+sLen+2 {
 		return nil, errors.New("encoding error")
 	}
 
-	// hash.Reset()
-	// hash.Write(m)
-	// mHash := hash.Sum(nil)
-	mHash := m
 	hash.Reset()
 
 	mm := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
@@ -211,4 +207,8 @@ func encodeEMSAPSS(hash hash.Hash, m, salt []byte, emBits int) ([]byte, error) {
 	em = append(em, 0xbc)
 
 	return em, nil
+}
+
+func verifyEMSAPSS() {
+
 }
