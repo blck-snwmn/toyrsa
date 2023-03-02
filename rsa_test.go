@@ -147,5 +147,9 @@ func TestSignPSS(t *testing.T) {
 		if !reflect.DeepEqual(s, gs) {
 			t.Errorf("\ngot =%X,\nwant=%X\n", s, gs)
 		}
+		err = rsa.VerifyPSS(&key.PublicKey, crypto.SHA256, digest, s, &rsa.PSSOptions{SaltLength: 10})
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 }
