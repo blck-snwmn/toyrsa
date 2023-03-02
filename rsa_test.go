@@ -32,11 +32,11 @@ func Test_Encrypt(t *testing.T) {
 	var (
 		d = key.D
 		n = key.N
-		e = key.E
+		e = big.NewInt(int64(key.E))
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
-	ciphertext := encrypt(n, big.NewInt(int64(e)), plaintext)
+	ciphertext := encrypt(n, e, plaintext)
 	decryptPlaintext := decrypt(n, d, ciphertext)
 	if !reflect.DeepEqual(plaintext, decryptPlaintext) {
 		t.Errorf("\ngot =%X,\nwant=%X\n", plaintext, decryptPlaintext)
@@ -50,7 +50,7 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 	var (
 		d = key.D
 		n = key.N
-		e = key.E
+		e = big.NewInt(int64(key.E))
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
@@ -66,7 +66,7 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		gociphertext, _ := rsa.EncryptPKCS1v15(rand.Reader, &key.PublicKey, plaintext)
-		ciphertext, err := EncryptPKCS1v15(genReader(gociphertext), n, big.NewInt(int64(e)), plaintext)
+		ciphertext, err := EncryptPKCS1v15(genReader(gociphertext), n, e, plaintext)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -92,7 +92,7 @@ func Test_EncryptOAEP(t *testing.T) {
 	var (
 		d = key.D
 		n = key.N
-		e = key.E
+		e = big.NewInt(int64(key.E))
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
@@ -103,7 +103,7 @@ func Test_EncryptOAEP(t *testing.T) {
 	reader = io.TeeReader(reader, b)
 	for i := 0; i < 1000; i++ {
 		gociphertext, _ := rsa.EncryptOAEP(sha256.New(), reader, &key.PublicKey, plaintext, label)
-		ciphertext, _ := EncryptOAEP(sha256.New(), b, n, big.NewInt(int64(e)), plaintext, label)
+		ciphertext, _ := EncryptOAEP(sha256.New(), b, n, e, plaintext, label)
 		if !reflect.DeepEqual(ciphertext, gociphertext) {
 			t.Errorf("\ngot =%X,\nwant=%X", ciphertext, gociphertext)
 		}
