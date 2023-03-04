@@ -62,18 +62,7 @@ func VerifyPKCS1v15(hash hash.Hash, n, e *big.Int, digest, signature []byte) err
 	return nil
 }
 
-func encodeEMSAPKCS1v15(hash hash.Hash, m []byte, emLen int) ([]byte, error) {
-	// 1.  Apply the hash function to the message M to produce a hash
-	// value H:
-	//    H = Hash(M).
-	// If the hash function outputs "message too long", output
-	// "message too long" and stop.
-	// hash.Reset()
-	// hash.Write(m)
-	// h := hash.Sum(nil)
-	// hash.Reset()
-	h := m
-
+func encodeEMSAPKCS1v15(hash hash.Hash, h []byte, emLen int) ([]byte, error) {
 	// 2.  Encode the algorithm ID for the hash function and the hash
 	// value into an ASN.1 value of type DigestInfo (see
 	// Appendix A.2.4) with the DER, where the type DigestInfo has
@@ -99,7 +88,10 @@ func encodeEMSAPKCS1v15(hash hash.Hash, m []byte, emLen int) ([]byte, error) {
 	// 4.  Generate an octet string PS consisting of emLen - tLen - 3
 	// octets with hexadecimal value 0xff.  The length of PS will be
 	// at least 8 octets.
-	ps := bytes.Repeat([]byte{0xff}, emLen-tLen-3)
+	ps := make([]byte, emLen-tLen-3)
+	for i := 0; i < len(ps); i++ {
+		ps[i] = 0xff
+	}
 
 	// 5.  Concatenate PS, the DER encoding T, and other padding to form
 	// the encoded message EM as
