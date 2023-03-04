@@ -2,8 +2,10 @@ package toyrsa
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"io"
 	"math/big"
 	"reflect"
@@ -49,5 +51,37 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 		if !reflect.DeepEqual(plaintext, decryptPlaintext) {
 			t.Errorf("\ngot =%X,\nwant=%X\n", plaintext, decryptPlaintext)
 		}
+	}
+}
+
+func Test_SignPKCS1v15(t *testing.T) {
+	t.Parallel()
+	key, _ := rsa.GenerateKey(rand.Reader, 1024)
+
+	var (
+		d = key.D
+		n = key.N
+		// e = big.NewInt(int64(key.E))
+
+		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
+	)
+	hash := sha256.New()
+	hash.Write(plaintext)
+	digest := hash.Sum(nil)
+
+	gs, err := rsa.SignPKCS1v15(nil, key, crypto.SHA256, digest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := SignPKCS1v15(sha256.New(), n, d, digest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(s, gs) {
+		t.Errorf("\ngot =%X,\nwant=%X\n", s, gs)
+	}
+	err = rsa.VerifyPKCS1v15(&key.PublicKey, crypto.SHA256, digest, s)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
