@@ -61,7 +61,7 @@ func Test_SignPKCS1v15(t *testing.T) {
 	var (
 		d = key.D
 		n = key.N
-		// e = big.NewInt(int64(key.E))
+		e = big.NewInt(int64(key.E))
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
@@ -81,6 +81,10 @@ func Test_SignPKCS1v15(t *testing.T) {
 		t.Errorf("\ngot =%X,\nwant=%X\n", s, gs)
 	}
 	err = rsa.VerifyPKCS1v15(&key.PublicKey, crypto.SHA256, digest, s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = VerifyPKCS1v15(sha256.New(), n, e, digest, s)
 	if err != nil {
 		t.Fatal(err)
 	}

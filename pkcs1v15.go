@@ -45,6 +45,23 @@ func SignPKCS1v15(hash hash.Hash, n, d *big.Int, digest []byte) ([]byte, error) 
 	return Sign(n, d, em), nil
 }
 
+func VerifyPKCS1v15(hash hash.Hash, n, e *big.Int, digest, signature []byte) error {
+	k := (n.BitLen() + 7) / 8
+	if k < len(signature) {
+		return errVerification
+	}
+	em := encrypt(n, e, signature)
+
+	emm, err := encodeEMSAPKCS1v15(hash, digest, k)
+	if err != nil {
+		return errVerification
+	}
+	if subtle.ConstantTimeCompare(em, emm) == 0 {
+		return errVerification
+	}
+	return nil
+}
+
 func encodeEMSAPKCS1v15(hash hash.Hash, m []byte, emLen int) ([]byte, error) {
 	// 1.  Apply the hash function to the message M to produce a hash
 	// value H:
