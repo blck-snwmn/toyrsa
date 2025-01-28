@@ -60,10 +60,7 @@ func mgf1xor(out, seed []byte, hash hash.Hash) {
 		h := hash.Sum(buf[:0])
 		subtle.XORBytes(out, out, h)
 
-		consumeLen := hLen
-		if len(out) < consumeLen {
-			consumeLen = len(out)
-		}
+		consumeLen := min(hLen, len(out))
 		out = out[consumeLen:]
 		counter++
 	}
