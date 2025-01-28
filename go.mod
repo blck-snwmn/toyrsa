@@ -1,3 +1,3 @@
 module github.com/blck-snwmn/toyrsa
 
-go 1.20
+go 1.23.5
