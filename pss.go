@@ -100,6 +100,7 @@ func verifyEMSAPSS(hash hash.Hash, mHash, em []byte, sLen, emBits int) error {
 	// maskedDB are not all equal to zero, output "inconsistent" and
 	// stop.
 	mask := ^(0xFF >> (8*emLen - emBits))
+	//nolint: gosec // toy implementation
 	if subtle.ConstantTimeByteEq(db[0]&uint8(mask), 0x00) == 0 {
 		return errVerification
 	}
