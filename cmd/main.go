@@ -22,7 +22,7 @@ func main() {
 
 		plaintext = []byte("Cozy lummox gives smart squid who asks for job pen.")
 	)
-	fmt.Println(key.PublicKey.Size())
+	fmt.Println(key.Size())
 
 	{
 		ciphertext := toyrsa.Encrypt(n, big.NewInt(int64(e)), plaintext)
