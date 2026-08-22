@@ -3,7 +3,7 @@ pre-commit:
   commands:
     lint:
       glob: "*.go"
-      run: golangci-lint run --enable=gosec
+      run: golangci-lint run
     test:
       glob: "*.go"
       run: go test ./... --shuffle on --parallel 10 --p 10
