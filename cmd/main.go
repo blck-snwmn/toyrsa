@@ -34,7 +34,8 @@ func main() {
 	}
 	{
 		dummy := bytes.Repeat([]byte{0xFF}, 128)
-		gociphertext, _ := rsa.EncryptPKCS1v15(bytes.NewBuffer(dummy), &key.PublicKey, plaintext)
+		// Keep the deprecated call to compare the toy PKCS #1 v1.5 implementation with the standard library.
+		gociphertext, _ := rsa.EncryptPKCS1v15(bytes.NewBuffer(dummy), &key.PublicKey, plaintext) //nolint:staticcheck
 		fmt.Printf("%X\n", gociphertext)
 
 		ciphertext, _ := toyrsa.EncryptPKCS1v15(bytes.NewBuffer(dummy), n, big.NewInt(int64(e)), plaintext)

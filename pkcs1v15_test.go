@@ -34,7 +34,8 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 	}
 
 	for i := 0; i < 1000; i++ {
-		gociphertext, _ := rsa.EncryptPKCS1v15(rand.Reader, &key.PublicKey, plaintext)
+		// Keep the deprecated call to compare the toy PKCS #1 v1.5 implementation with the standard library.
+		gociphertext, _ := rsa.EncryptPKCS1v15(rand.Reader, &key.PublicKey, plaintext) //nolint:staticcheck
 		ciphertext, err := EncryptPKCS1v15(genReader(gociphertext), n, e, plaintext)
 		if err != nil {
 			t.Fatal(err)
