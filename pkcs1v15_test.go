@@ -34,7 +34,7 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 	}
 
 	for range 1000 {
-		gociphertext, _ := rsa.EncryptPKCS1v15(rand.Reader, &key.PublicKey, plaintext)
+		gociphertext, _ := rsa.EncryptPKCS1v15(rand.Reader, &key.PublicKey, plaintext) //nolint:staticcheck // Compare the toy implementation with the standard library reference.
 		ciphertext, err := EncryptPKCS1v15(genReader(gociphertext), n, e, plaintext)
 		if err != nil {
 			t.Fatal(err)
