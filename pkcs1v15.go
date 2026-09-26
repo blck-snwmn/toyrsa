@@ -11,6 +11,9 @@ import (
 
 func EncryptPKCS1v15(random io.Reader, n, e *big.Int, plaintext []byte) ([]byte, error) {
 	k := (n.BitLen() + 7) / 8
+	if len(plaintext) > k-11 {
+		return nil, errors.New("message too long")
+	}
 	em := make([]byte, k)
 	em[1] = 2
 	err := fillNonZeroBytes(random, em[2:k-len(plaintext)-1]) // -1 is 0x00

@@ -8,12 +8,14 @@ import (
 	"testing"
 )
 
+// openSSLVectorModulus is the public modulus of test512Key in Go's rsa_test.go.
+const openSSLVectorModulus = "b2990f49c47dfa8cd400ae6a4d1b8a3b6a13642b23f28b003bfb97790ade9a4cc82b8b2a81747ddec08b6296e53a08c331687ef25c4bf4936ba1c0e6041e9d15"
+
 func TestEncryptPKCS1v15OpenSSLVectors(t *testing.T) {
 	// Ciphertexts are OpenSSL-generated vectors from
 	// https://go.dev/src/crypto/rsa/pkcs1v15_test.go.
-	// The modulus and padding correspond to test512Key in Go's rsa_test.go.
-	const modulus = "b2990f49c47dfa8cd400ae6a4d1b8a3b6a13642b23f28b003bfb97790ade9a4cc82b8b2a81747ddec08b6296e53a08c331687ef25c4bf4936ba1c0e6041e9d15"
-	n, ok := new(big.Int).SetString(modulus, 16)
+	// The padding was recovered from the matching test512Key.
+	n, ok := new(big.Int).SetString(openSSLVectorModulus, 16)
 	if !ok {
 		t.Fatal("invalid test modulus")
 	}
@@ -71,6 +73,51 @@ func TestEncryptPKCS1v15OpenSSLVectors(t *testing.T) {
 			}
 			if !bytes.Equal(got, want) {
 				t.Errorf("ciphertext = %x, want %x", got, want)
+			}
+		})
+	}
+}
+
+func TestEncryptPKCS1v15PlaintextLength(t *testing.T) {
+	n, ok := new(big.Int).SetString(openSSLVectorModulus, 16)
+	if !ok {
+		t.Fatal("invalid test modulus")
+	}
+	k := (n.BitLen() + 7) / 8
+	e := big.NewInt(65537)
+
+	tests := []struct {
+		name    string
+		length  int
+		wantErr bool
+	}{
+		{name: "empty", length: 0},
+		{name: "maximum", length: k - 11},
+		{name: "one byte too long", length: k - 10, wantErr: true},
+		{name: "no padding", length: k - 3, wantErr: true},
+		{name: "no room for header", length: k - 2, wantErr: true},
+		{name: "longer than modulus", length: k + 1, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			plaintext := bytes.Repeat([]byte{'x'}, tt.length)
+			padding := bytes.NewReader(bytes.Repeat([]byte{0xff}, k))
+			ciphertext, err := EncryptPKCS1v15(padding, n, e, plaintext)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("expected an error for %d-byte plaintext", tt.length)
+				}
+				if ciphertext != nil {
+					t.Fatalf("ciphertext = %x, want nil on error", ciphertext)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(ciphertext) != k {
+				t.Fatalf("ciphertext length = %d, want %d", len(ciphertext), k)
 			}
 		})
 	}
