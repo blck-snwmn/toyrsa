@@ -33,7 +33,7 @@ func Test_EncryptPKCS1v15(t *testing.T) {
 		return bytes.NewBuffer(x[0:index])
 	}
 
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		gociphertext, _ := rsa.EncryptPKCS1v15(rand.Reader, &key.PublicKey, plaintext)
 		ciphertext, err := EncryptPKCS1v15(genReader(gociphertext), n, e, plaintext)
 		if err != nil {
@@ -69,7 +69,7 @@ func Test_SignPKCS1v15(t *testing.T) {
 	hash.Write(plaintext)
 	digest := hash.Sum(nil)
 
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		gs, err := rsa.SignPKCS1v15(nil, key, crypto.SHA256, digest)
 		if err != nil {
 			t.Fatal(err)

@@ -30,7 +30,7 @@ func TestSignPSS(t *testing.T) {
 	hash := sha256.New()
 	hash.Write(plaintext)
 	digest := hash.Sum(nil)
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		gs, err := rsa.SignPSS(reader, key, crypto.SHA256, digest, &rsa.PSSOptions{SaltLength: 10})
 		if err != nil {
 			t.Fatal(err)
