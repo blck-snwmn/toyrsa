@@ -27,7 +27,7 @@ func Test_EncryptOAEP(t *testing.T) {
 	reader := rand.Reader
 	b := bytes.NewBuffer(nil)
 	reader = io.TeeReader(reader, b)
-	for i := 0; i < 1000; i++ {
+	for range 1000 {
 		gociphertext, _ := rsa.EncryptOAEP(sha256.New(), reader, &key.PublicKey, plaintext, label)
 		ciphertext, _ := EncryptOAEP(sha256.New(), b, n, e, plaintext, label)
 		if !reflect.DeepEqual(ciphertext, gociphertext) {

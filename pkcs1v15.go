@@ -89,7 +89,7 @@ func encodeEMSAPKCS1v15(hash hash.Hash, h []byte, emLen int) ([]byte, error) {
 	// octets with hexadecimal value 0xff.  The length of PS will be
 	// at least 8 octets.
 	ps := make([]byte, emLen-tLen-3)
-	for i := 0; i < len(ps); i++ {
+	for i := range ps {
 		ps[i] = 0xff
 	}
 
